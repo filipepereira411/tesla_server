@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Rigoroso Estilo Tesla</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { margin-bottom: 20px; font-weight: 300; }
+        .grid-camaras {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+        .contentor-camara {
+            background: #222;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: #000;
+            transform: scaleX(-1); /* Inverte para efeito de espelho/retrovisor */
+        }
+        .btn-executar {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 18px;
+            background-color: #cc0000;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(204, 0, 0, 0.4);
+        }
+        .btn-executar:hover { background-color: #e60000; transform: scale(1.05); }
+        .status { margin-top: 10px; color: #aaa; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <h1>PAINEL DE CONTROLO</h1>
+
+    <div class="grid-camaras">
+        <div class="contentor-camara">
+            <h3>Câmara Frontal</h3>
+            <video id="cam-frontal" autoplay playsinline></video>
+        </div>
+        <div class="contentor-camara">
+            <h3>Câmara Traseira</h3>
+            <video id="cam-traseira" autoplay playsinline></video>
+        </div>
+    </div>
+
+    <button class="btn-executar" onclick="dispararFicheiroLocal()">Ativar Sistema (.EXE)</button>
+    <div id="status" class="status">Aguardando comando...</div>
+
+    <script>
+        // 1. LIGAR AS CÂMARAS (Frente e Trás)
+        async function iniciarCamaras() {
+            try {
+                const dispositivos = await navigator.mediaDevices.enumerateDevices();
+                const videoDispositivos = dispositivos.filter(device => device.kind === 'videoinput');
+
+                // Câmara Frontal (ID 1 ou padrão)
+                if (videoDispositivos[0]) {
+                    const stream1 = await navigator.mediaDevices.getUserMedia({ 
+                        video: { deviceId: videoDispositivos[0].deviceId } 
+                    });
+                    document.getElementById('cam-frontal').srcObject = stream1;
+                }
+
+                // Câmara Traseira (ID 2 se houver uma segunda câmara USB ou do telemóvel)
+                if (videoDispositivos[1]) {
+                    const stream2 = await navigator.mediaDevices.getUserMedia({ 
+                        video: { deviceId: videoDispositivos[1].deviceId } 
+                    });
+                    document.getElementById('cam-traseira').srcObject = stream2;
+                } else {
+                    // Fallback se só houver uma câmara detetada
+                    console.log("Segunda câmara não encontrada. Usando câmara padrão no segundo ecrã.");
+                }
+            } catch (erro) {
+                console.error("Erro ao aceder às câmaras: ", erro);
+            }
+        }
+
+        // 2. ENVIAR O PEDIDO PARA O TEU PC CORRER O .BAT
+        async function dispararFicheiroLocal() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "A enviar comando para o PC local...";
+
+            try {
+                // Comunica com o servidor Node.js que corre no teu PC
+                const resposta = await fetch('http://localhost:3001/executar');
+                const texto = await resposta.text();
+                statusDiv.style.color = "#00ff00";
+                statusDiv.innerText = "Sucesso: " + texto;
+            } catch (erro) {
+                statusDiv.style.color = "#ff3333";
+                statusDiv.innerText = "Erro: Garante que o servidor local está ligado.";
+            }
+        }
+
+        // Iniciar os feeds de vídeo ao carregar a página
+        window.onload = iniciarCamaras;
+    </script>
+</body>
+</html>
