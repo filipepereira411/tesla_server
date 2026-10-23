@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla Model CARF - Painel do Dispositivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #000000;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #ffffff;
+        }
+
+        /* Barra de Estado Superior */
+        .tesla-top-bar {
+            height: 35px;
+            background: #000000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            font-size: 13px;
+            color: #8e8e93;
+        }
+        .top-left { display: flex; gap: 15px; color: #ffffff; font-weight: 500; }
+        .top-center { display: flex; gap: 10px; align-items: center; }
+        .profile-btn { background: none; border: none; color: #ffffff; font-size: 13px; cursor: pointer; }
+
+        /* Área Principal do Ecrã */
+        .tesla-main-container {
+            flex: 1;
+            display: flex;
+            width: 100%;
+            background: #f4f4f4;
+            color: #111111;
+        }
+
+        /* Bloco Esquerdo: Onde ficará o Visor da Câmara do Dispositivo */
+        .car-section {
+            width: 40%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 25px;
+            border-right: 1px solid #e5e5ea;
+            position: relative;
+        }
+        .car-action-text {
+            font-size: 14px;
+            color: #ff3b30;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .camera-display {
+            flex: 1;
+            width: 100%;
+            margin: 15px 0;
+            background: #000000;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        video.mirror {
+            transform: scaleX(-1);
+        }
+        /* Efeito de Flash */
+        .flash-effect {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff; opacity: 0; z-index: 5; pointer-events: none;
+        }
+        .flash-effect.active {
+            animation: flashAnim 0.3s ease-out;
+        }
+        @keyframes flashAnim {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        /* Mini Leitor de Média Inferior */
+        .media-widget {
+            background: #f2f2f7;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #48484a;
+        }
+
+        /* Bloco Direito: Menus de Configuração Split */
+        .menu-section {
+            width: 60%;
+            display: flex;
+            background: #f4f4f4;
+        }
+        .menu-sidebar {
+            width: 35%;
+            background: #f4f4f4;
+            padding: 15px 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e5e5ea;
+        }
+        .menu-item {
+            padding: 12px 25px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #48484a;
+            cursor: pointer;
+        }
+        .menu-item.active {
+            background: #ffffff;
+            color: #111111;
+            font-weight: 600;
+            border-radius: 8px 0 0 8px;
+            margin-left: 10px;
+        }
+        .menu-content {
+            width: 65%;
+            background: #ffffff;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .content-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .tesla-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .grid-btn {
+            background: #f2f2f7;
+            border: 1px solid #e5e5ea;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #111111;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .grid-btn.active {
+            background: #111111;
+            color: #ffffff;
+        }
+        .btn-sub { font-size: 11px; color: #8e8e93; }
+
+        /* Barra de Climatização Inferior */
+        .tesla-bottom-dock {
+            height: 65px;
+            background: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+        .dock-btn { font-size: 22px; cursor: pointer; background: none; border: none; color: #8e8e93; }
+        .dock-btn.active { color: #ffffff; }
+        .temp-display { color: #ffffff; font-size: 22px; font-weight: 300; }
+
+        /* Inicialização */
+        .init-overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background:#000; z-index:100;
+            display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+        }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="initOverlay" class="init-overlay">
+        <h1 style="letter-spacing: 4px;">TESLA CARF OS</h1>
+        <p style="color: #666; font-size: 14px;">Aceder com a câmara nativa do dispositivo</p>
+        <button style="padding:12px 35px; font-weight:bold; cursor:pointer; border-radius:8px;" onclick="startTesla()">Ligar Painel</button>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="tesla-top-bar">
+        <div class="top-left">
+            <span>62% 🔋</span>
+        </div>
+        <div class="top-center">
+            <button class="profile-btn">👤 Perfil Filipe</button>
+        </div>
+        <div class="top-right">
+            <span id="teslaClock" style="color: white;">00:00</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="tesla-main-container">
+        
+        <!-- Bloco Esquerdo: Câmara Nativa do Dispositivo -->
+        <div class="car-section">
+            <div class="car-action-text">CÂMARA DE BORDO ATIVA</div>
+            
+            <div class="camera-display">
+                <div id="flash" class="flash-effect"></div>
+                <video id="cameraView" autoplay playsinline class="mirror"></video>
+            </div>
+
+            <div class="media-widget" style="cursor: pointer;" onclick="capturePhoto()">
+                <span>📸 Clique para Capturar Foto</span>
+                <span>📁</span>
+            </div>
+        </div>
+
+        <!-- Bloco Direito: Menus Tesla -->
+        <div class="menu-section">
+            <div class="menu-sidebar">
+                <div class="menu-item active">⚙️ Controlos</div>
+                <div class="menu-item">⚡ Dinâmica</div>
+                <div class="menu-item">🛡️ Autopilot</div>
+                <div class="menu-item">💡 Luzes</div>
+            </div>
+
+            <div class="menu-content">
+                <div class="content-title">Controlos Rápidos</div>
+                <div class="tesla-grid">
+                    <div class="grid-btn active" onclick="switchCamera()">
+                        <span>Alternar Câmara</span>
+                        <span class="btn-sub">Mudar lente</span>
+                    </div>
+                    <div class="grid-btn" onclick="capturePhoto()">
+                        <span>Tirar Foto</span>
+                        <span class="btn-sub">Guardar PNG</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Dock -->
+    <div class="tesla-bottom-dock">
+        <button class="dock-btn active">🚗</button>
+        <button class="dock-btn">🎵</button>
+        <div class="temp-display">20.5°C</div>
+        <button class="dock-btn">📞</button>
+        <button class="dock-btn">⚙️</button>
+    </div>
+
+    <canvas id="captureCanvas"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>
