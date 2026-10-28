@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla x Grok Bot</title>
+    <style>
+        :root {
+            --tesla-black: #111111;
+            --tesla-grey: #1c1c1c;
+            --tesla-light-grey: #2f2f2f;
+            --tesla-text: #f4f4f4;
+            --tesla-accent: #3d5afe;
+            --tesla-red: #cc0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--tesla-black);
+            color: var(--tesla-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header / Navegação */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--tesla-light-grey);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: var(--tesla-text);
+        }
+
+        .logo span {
+            color: var(--tesla-red);
+        }
+
+        nav a {
+            color: var(--tesla-text);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--tesla-red);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a237e 0%, var(--tesla-black) 70%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 30px;
+            max-width: 600px;
+            animation: fadeIn 2s ease-out;
+        }
+
+        .cta-btn {
+            background-color: var(--tesla-text);
+            color: var(--tesla-black);
+            padding: 12px 40px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .cta-btn:hover {
+            background-color: transparent;
+            color: var(--tesla-text);
+            border: 2px solid var(--tesla-text);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Secção de Funcionalidades */
+        .features {
+            padding: 80px 40px;
+            background-color: var(--tesla-grey);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 50px;
+            letter-spacing: 1px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--tesla-light-grey);
+            padding: 30px;
+            border-radius: 12px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(61, 90, 254, 0.2);
+            border-color: var(--tesla-accent);
+        }
+
+        .card icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .card p {
+            color: #bbb;
+            font-size: 1rem;
+        }
+
+        /* Interface de Demonstração (Chat) */
+        .demo-chat {
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--tesla-black);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--tesla-grey);
+            border-radius: 16px;
+            border: 1px solid var(--tesla-light-grey);
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .chat-header {
+            background-color: var(--tesla-light-grey);
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #00ff66;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .chat-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+        }
+
+        .msg.user {
+            background-color: var(--tesla-light-grey);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg.grok {
+            background-color: rgba(61, 90, 254, 0.15);
+            border: 1px solid var(--tesla-accent);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        /* Rodapé */
+        footer {
+            text-align: center;
+            padding: 40px;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid var(--tesla-light-grey);
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            header { padding: 20px; }
+            nav { display: none; } /* Simplificação para mobile */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">TESLA<span>.</span></div>
+        <nav>
+            <a href="#features">Funcionalidades</a>
+            <a href="#demo">Demonstração</a>
+            <a href="#">Model Y</a>
+            <a href="#">SuperGrok</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Grok Bot Integrado</h1>
+        <p>O seu copiloto de Inteligência Artificial com processamento em tempo real. Disponível para o ecossistema Tesla através da atualização de software 2026.</p>
+        <a href="#demo" class="cta-btn">Experimentar Copiloto</a>
+    </section>
+
+    <!-- Secção de Funcionalidades -->
+    <section id="features" class="features">
+        <h2 class="section-title">Inteligência Automotiva Avançada</h2>
+        <div class="grid">
+            <div class="card">
+                <icon>⚡</icon>
+                <h3>Latência de 0.7s</h3>
+                <p>Respostas e execução de comandos quase instantâneas, processadas localmente no chip AMD Ryzen do seu veículo.</p>
+            </div>
+            <div class="card">
+                <icon>📅</icon>
+                <h3>Grok Connectors</h3>
+                <p>Sincronização total com o seu Gmail, Outlook e Calendário. Organize o seu dia de trabalho enquanto conduz.</p>
+            </div>
+            <div class="card">
+                <icon>🎭</icon>
+                <h3>Personas Customizáveis</h3>
+                <p>Altere o tom do Grok nas definições. Escolha entre os modos Contador de Histórias, Terapeuta ou o modo Clássico.</p>
+            </div>
+            <div class="card">
+                <icon>🤖</icon>
+                <h3>Automação Externa</h3>
+                <p>Peça ao Grok Bot para reservar mesas em restaurantes ou encomendar o seu café matinal de forma 100% autónoma.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demonstração de Chat -->
+    <section id="demo" class="demo-chat">
+        <h2 class="section-title">Interação em Tempo Real</h2>
+        <div class="chat-container">
+            <div class="chat-header">
+                <span class="status-dot"></span>
+                <span>Grok Bot — Model Y Co-Pilot</span>
+            </div>
+            <div class="chat-body">
+                <div class="msg user">
+                    Grok, tenho uma reunião daqui a 20 minutos. Reorganiza a minha rota e avisa o meu cliente se o trânsito me for atrasar.
+                </div>
+                <div class="msg grok">
+                    Perfeito. Analisei o trânsito na IC19 e prevejo um atraso de 4 minutos. Já enviei um e-mail ao Tiago a avisar e recalculei a rota no mapa da Tesla para evitar o nó principal. Deseja que ligue o pré-aquecimento da bateria para o Supercharger no caminho?
+                </div>
+                <div class="msg user">
+                    Sim, por favor. E ativa a persona "Terapeuta" para o resto da viagem.
+                </div>
+                <div class="msg grok">
+                    Bateria a otimizar para carregamento rápido. Modo relaxante ativado. Respira fundo, nós tratamos do caminho por ti. Que música gostavas de ouvir para descontrair?
+                </div>
+            </div>
+        </div>
+    </section>
+
